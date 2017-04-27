@@ -19,7 +19,7 @@
     "nicName": "myVMNic",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
-    "subnetPrefix": "10.0.0.0/2,
+    "subnetPrefix": "10.0.0.0/24,
     "nicName": "[concat(variables('namespace'), 'nic')]",
     "location": "Southeast Asia",
     "publicIPAddressName": "myPublicIP",
@@ -94,9 +94,6 @@
         ]
       }
     },
-    
-    
-    
     
     {
       "type": "Microsoft.Compute/availabilitySets",
