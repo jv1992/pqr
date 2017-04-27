@@ -29,19 +29,25 @@
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "storageAccountName": "[parameters('storageSettings').name]",
+    "publicIPAddressName": "myPublicIP",
+    "publicIPAddressType": "Dynamic",
     
     "vmName": "[concat(parameters('commonSettings').namespace, 'vm')]",
     "publicIpName": "[concat(parameters('commonSettings').namespace, 'publicIp')]",
     "vmSize": "Standard_A0"
   },
   "resources": [
+    
     {
       "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
-      "location": "[resourceGroup().location]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "PublicIPAddress"
+      },
       "properties": {
-        "publicIPAllocationMethod": "Dynamic",
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
         "dnsSettings": {
           "domainNameLabel": "[parameters('dnsName')]"
         }
