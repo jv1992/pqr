@@ -29,7 +29,7 @@
     }
   },
   "variables": {
-    "namespace": "[parameters('commonSettings').namespace]",
+    "namespace": "namespace",
     "location": "Southeast Asia",
     "publicIPAddressName": "myPublicIP",
  "publicIPAddressType": "Dynamic",
