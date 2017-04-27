@@ -12,7 +12,18 @@
   },
   "variables": {
   "virtualNetworkName": "MyVNET",
-    "location": "Southeast Asia"
+    "location": "Southeast Asia",
+    "virtualNetworkName": "MyVNET",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "nicName": "myVMNic",
+    "addressPrefix": "10.0.0.0/16",
+    "subnetName": "Subnet",
+    "subnetPrefix": "10.0.0.0/2,
+    "nicName": "[concat(variables('namespace'), 'nic')]",
+    "location": "Southeast Asia",
+    "publicIPAddressName": "myPublicIP",
+ "publicIPAddressType": "Dynamic"
   },
   "resources": [
     {
