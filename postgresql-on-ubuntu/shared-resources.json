@@ -11,7 +11,8 @@
     
   },
   "variables": {
-  "virtualNetworkName": "MyVNET"
+  "virtualNetworkName": "MyVNET",
+    "location": "Southeast Asia"
   },
   "resources": [
     {
