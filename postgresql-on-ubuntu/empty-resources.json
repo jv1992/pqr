@@ -10,10 +10,7 @@
       "type": "object",
       "defaultValue": {}
     },
-    "networkSettings": {
-      "type": "object",
-      "defaultValue": {}
-    },
+    
     "machineSettings": {
       "type": "object",
       "defaultValue": {}
@@ -30,10 +27,7 @@
       "type": "securestring",
       "defaultValue": ""
     },
-    "subnet": {
-      "type": "object",
-      "defaultValue": {}
-    },
+    
     "dnsName": {
       "type": "string",
       "defaultValue": ""
