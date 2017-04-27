@@ -56,17 +56,18 @@
       "metadata": {
         "description": "The flag allowing to enable or disable provisioning of the jumpbox VM that can be used to access the PostgreSQL environment"
       }
-    },
-    "virtualNetworkName": {
-      "type": "string",
-      "defaultValue": "vnet",
-      "metadata": {
-        "description": "Virtual network name"
-      }
     }
+    
   },
   "variables": {
     "templateBaseUrl": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/postgresql-on-ubuntu/",
+    "nicName": "myVMNic",
+    "addressPrefix": "10.0.0.0/16",
+    "subnetName": "Subnet",
+    "subnetPrefix": "10.0.0.0/24",
+    "virtualNetworkName": "MyVNET",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
     "sharedTemplateUrl": "[concat(variables('templateBaseUrl'), 'shared-resources.json')]",
     "tshirtSizeSmall": {
       "vmSize": "Standard_A1",
@@ -155,22 +156,7 @@
         "version": "latest"
       }
     },
-    "networkSettings": {
-      "vnetName": "[parameters('virtualNetworkName')]",
-      "addressPrefix": "10.0.0.0/16",
-      "subnets": {
-        "dmz": {
-          "name": "dmz",
-          "prefix": "10.0.0.0/24",
-          "vnet": "[parameters('virtualNetworkName')]"
-        },
-        "data": {
-          "name": "data",
-          "prefix": "10.0.1.0/24",
-          "vnet": "[parameters('virtualNetworkName')]"
-        }
-      }
-    },
+    
     "availabilitySetSettings": {
       "name": "pgsqlAvailabilitySet",
       "fdCount": 3,
@@ -178,8 +164,67 @@
     }
   },
   "resources": [
+    
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "VirtualNetwork"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+-              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicName')]",
+
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "NetworkInterface"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
++          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+
+            }
+          }
+        ]
+      }
+    },
+    
+    
     {
       "name": "shared",
+
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "properties": {
@@ -192,9 +237,7 @@
           "storageSettings": {
             "value": "[variables('tshirtSize').storage]"
           },
-          "networkSettings": {
-            "value": "[variables('networkSettings')]"
-          },
+          
           "availabilitySetSettings": {
             "value": "[variables('availabilitySetSettings')]"
           }
@@ -206,7 +249,8 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'shared')]"
+        "[concat('Microsoft.Resources/deployments/', 'shared')]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -214,6 +258,16 @@
           "uri": "[variables('tshirtSize').vmTemplate]",
           "contentVersion": "1.0.0.0"
         },
+        
+        
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+            }
+          ]
+        },
+        
         "parameters": {
           "adminPassword": {
             "value": "[parameters('adminPassword')]"
@@ -224,9 +278,7 @@
           "osSettings": {
             "value": "[variables('osSettings')]"
           },
-          "subnet": {
-            "value": "[variables('networkSettings').subnets.data]"
-          },
+          
           "commonSettings": {
             "value": {
               "adminUsername": "[parameters('adminUsername')]",
@@ -234,8 +286,10 @@
             }
           },
           "storageSettings": {
+
             "value": "[variables('tshirtSize').storage]"
           },
+          
           "machineSettings": {
             "value": {
               "vmSize": "[variables('tshirtSize').vmSize]",
@@ -259,7 +313,18 @@
       "apiVersion": "2015-01-01",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'master-node')]"
-      ],
+        
+      ],  
+      
+        
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+            }
+          ]
+        }
+      
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -276,10 +341,9 @@
           "osSettings": {
             "value": "[variables('osSettings')]"
           },
-          "subnet": {
-            "value": "[variables('networkSettings').subnets.data]"
-          },
-          "commonSettings": {
+          
+-+
+    "commonSettings": {
             "value": {
               "adminUsername": "[parameters('adminUsername')]",
               "namespace": "sl"
@@ -310,8 +374,16 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'shared')]"
+        "[concat('Microsoft.Resources/deployments/', 'shared')]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
       ],
+"networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+            }
+          ]
+        },
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -336,9 +408,7 @@
           "adminPassword": {
             "value": "[parameters('adminPassword')]"
           },
-          "subnet": {
-            "value": "[variables('networkSettings').subnets.dmz]"
-          },
+          
           "osSettings": {
             "value": "[variables('osSettings')]"
           }
