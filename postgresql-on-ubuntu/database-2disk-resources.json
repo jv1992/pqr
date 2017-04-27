@@ -32,7 +32,7 @@
     "namespace": "[parameters('commonSettings').namespace]",
     "location": "Southeast Asia",
     "publicIPAddressName": "myPublicIP",
- 
+ "publicIPAddressType": "Dynamic",
     "storageAccountName": "[concat(parameters('storageSettings').name, variables('namespace'))]",
     "vmName": "[concat(variables('namespace'), 'vm')]",
     "nicName": "[concat(variables('namespace'), 'nic')]",
