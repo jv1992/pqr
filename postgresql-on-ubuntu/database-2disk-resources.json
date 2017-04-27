@@ -30,6 +30,7 @@
   },
   "variables": {
     "namespace": "[parameters('commonSettings').namespace]",
+    "location": "Southeast Asia",
  
     "storageAccountName": "[concat(parameters('storageSettings').name, variables('namespace'))]",
     "vmName": "[concat(variables('namespace'), 'vm')]",
