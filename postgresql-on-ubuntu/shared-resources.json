@@ -7,10 +7,8 @@
     },
     "availabilitySetSettings": {
       "type": "object"
-    },
-    "networkSettings": {
-      "type": "object"
     }
+    
   },
   "variables": {},
   "resources": [
@@ -27,33 +25,65 @@
         "accountType": "Standard_LRS"
       }
     },
-    {
+    
+    
+   {
       "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/virtualNetworks",
-      "name": "[parameters('networkSettings').vnetName]",
-      "location": "[resourceGroup().location]",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "VirtualNetwork"
+      },
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
-            "[parameters('networkSettings').addressPrefix]"
+            "[variables('addressPrefix')]"
           ]
         },
         "subnets": [
           {
-            "name": "[parameters('networkSettings').subnets.dmz.name]",
+            "name": "[variables('subnetName')]",
             "properties": {
-              "addressPrefix": "[parameters('networkSettings').subnets.dmz.prefix]"
-            }
-          },
-          {
-            "name": "[parameters('networkSettings').subnets.data.name]",
-            "properties": {
-              "addressPrefix": "[parameters('networkSettings').subnets.data.prefix]"
+              "addressPrefix": "[variables('subnetPrefix')]"
             }
           }
         ]
       }
     },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicName')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "NetworkInterface"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    
+    
+    
+    
     {
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[parameters('availabilitySetSettings').name]",
