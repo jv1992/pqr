@@ -31,7 +31,7 @@
     "storageAccountName": "[parameters('storageSettings').name]",
     "publicIPAddressName": "myPublicIP",
     "publicIPAddressType": "Dynamic",
-    "namespace": "[parameters('commonSettings').namespace]",
+    "namespace": "namespace",
     "vmName": "[concat(parameters('commonSettings').namespace, 'vm')]",
     "publicIpName": "[concat(parameters('commonSettings').namespace, 'publicIp')]",
     "vmSize": "Standard_A0"
