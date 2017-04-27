@@ -12,7 +12,7 @@
   },
   "variables": {
   "virtualNetworkName": "MyVNET",
-    "namespace": "[parameters('commonSettings').namespace]",
+    "namespace": "namespace",
     "location": "Southeast Asia",
     "virtualNetworkName": "MyVNET",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
